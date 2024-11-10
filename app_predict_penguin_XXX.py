@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from matplotlib import pyplot as plt
-%matplotlib inline
+import matplotlib.pyplot as plt
 import seaborn as sns
 import pickle
 
