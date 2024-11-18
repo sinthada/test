@@ -1,3 +1,5 @@
+%%writefile Predict_Species_Penguin.py
+
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -5,7 +7,7 @@ import seaborn as sns
 import pickle
 
 # Load the trained model
-with open('model_penguin_66130701708.pkl', 'rb') as file:
+with open('penguin_species_model.pkl', 'rb') as file:
     model = pickle.load(file)
 
 # Load the penguin dataset
@@ -19,7 +21,7 @@ if 'tab_selected' not in st.session_state:
     st.session_state.tab_selected = 0
 
 # Create tabs for prediction and visualization
-tabs = ['Predict Penguin Species', 'Visualize Data']
+tabs = ['Predict Penguin Species', 'Visualize Data', 'Predict from CSV']
 selected_tab = st.radio('Select Tab:', tabs, index=st.session_state.tab_selected)
 
 # Tab selection logic
@@ -49,8 +51,14 @@ if st.session_state.tab_selected == 0:
     })
 
     # Categorical Data Encoding
-    user_input['island'] = island_encoder.transform(user_input['island'])
-    user_input['sex'] = sex_encoder.transform(user_input['sex'])
+    user_input = pd.get_dummies(user_input, columns=['island', 'sex'])
+
+    # Align columns with the model's expected input
+    model_columns = model.feature_names_in_
+    for col in model_columns:
+        if col not in user_input.columns:
+            user_input[col] = 0  # Add missing columns with zeros
+    user_input = user_input[model_columns]  # Reorder columns
 
     # Predicting the species
     prediction = model.predict(user_input)
@@ -73,3 +81,44 @@ elif st.session_state.tab_selected == 1:
     plt.xlabel(feature)
     plt.ylabel('Count')
     st.pyplot(fig)
+
+# Tab 3: Predict from CSV
+elif st.session_state.tab_selected == 2:
+    st.header('Predict from CSV')
+
+    # Upload CSV file
+    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+
+    if uploaded_file is not None:
+        # Read CSV file
+        csv_df = pd.read_csv(uploaded_file)
+        csv_df = csv_df.dropna()  # Handle missing values by dropping rows
+
+        # Prepare data for prediction
+        csv_df_encoded = pd.get_dummies(csv_df, columns=['island', 'sex'])
+
+        # Align columns with the model's expected input
+        for col in model_columns:
+            if col not in csv_df_encoded.columns:
+                csv_df_encoded[col] = 0
+        csv_df_encoded = csv_df_encoded[model_columns]
+
+        # Predict species for each row
+        predictions = model.predict(csv_df_encoded)
+        csv_df['Predicted Species'] = predictions
+
+        # Display the DataFrame with predictions
+        st.subheader('Predicted Results:')
+        st.write(csv_df)
+
+        # Visualize predictions
+        st.subheader('Visualize Predictions')
+        feature_for_visualization = st.selectbox('Select Feature for Visualization:', csv_df.columns)
+
+        # Plot predictions
+        fig, ax = plt.subplots(figsize=(14, 8))
+        sns.histplot(data=csv_df, x=feature_for_visualization, hue='Predicted Species', multiple='stack', palette='viridis')
+        plt.title(f'Predicted Species Distribution by {feature_for_visualization}')
+        plt.xlabel(feature_for_visualization)
+        plt.ylabel('Count')
+        st.pyplot(fig)
