@@ -1,11 +1,16 @@
 
+
 import streamlit as st
 import pandas as pd
 import pickle
 
-# Load the trained KNN model
+# Load the trained KNN model (and possibly other objects)
 with open('model_penguin_66130701708.pkl', 'rb') as file:
-    model = pickle.load(file)
+    # Unpack the objects from the pickle file
+    loaded_objects = pickle.load(file)
+    
+    # Extract the model from the tuple (assume the model is the first item)
+    model = loaded_objects[0]  # Adjust the index if necessary
 
 # Load the penguin dataset for reference
 df = pd.read_csv('penguins_size.csv')
