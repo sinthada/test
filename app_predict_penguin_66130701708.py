@@ -1,5 +1,3 @@
-%%writefile app_predict_penguin_66130701708.py
-
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
