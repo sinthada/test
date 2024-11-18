@@ -19,7 +19,7 @@ if 'tab_selected' not in st.session_state:
     st.session_state.tab_selected = 0
 
 # Create tabs for prediction and visualization
-tabs = ['Predict Penguin Species', 'Visualize Data', 'Predict from CSV']
+tabs = ['Predict Penguin Species', 'Visualize Data']
 selected_tab = st.radio('Select Tab:', tabs, index=st.session_state.tab_selected)
 
 # Tab selection logic
@@ -73,45 +73,3 @@ elif st.session_state.tab_selected == 1:
     plt.xlabel(feature)
     plt.ylabel('Count')
     st.pyplot(fig)
-
-# Tab 3: Predict from CSV
-elif st.session_state.tab_selected == 2:
-    st.header('Predict from CSV')
-
-    # Upload CSV file
-    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
-
-    if uploaded_file is not None:
-        # Read CSV file
-        csv_df_org = pd.read_csv(uploaded_file) 
-        csv_df_org = csv_df_org.dropna()  # Handle missing values by dropping rows
-
-        csv_df = csv_df_org.copy()
-        csv_df = csv_df.drop('species',axis=1)
-
-     # Categorical Data Encoding
-    csv_df['island'] = island_encoder.transform(csv_df['island'])
-    csv_df['sex'] = sex_encoder.transform(csv_df['sex'])
-
-
-        # Predicting
-        predictions = model.predict(csv_df)
-
-        # Add predictions to the DataFrame
-        csv_df_org['species'] = predictions
-
-        # Display the DataFrame with predictions
-        st.subheader('Predicted Results:')
-        st.write(csv_df_org)
-
-        # Visualize predictions
-        st.subheader('Visualize Predictions')
-        feature_for_visualization = st.selectbox('Select Feature for Visualization:', csv_df.columns)
-
-        # Plot predictions
-        fig, ax = plt.subplots(figsize=(14, 8))
-        sns.histplot(data=csv_df, x=feature_for_visualization, hue='Predicted Species', data=csv_df_org, palette='viridis')
-        plt.title(f'Predicted Species Distribution by {feature_for_visualization}')
-        plt.xlabel(feature_for_visualization)
-        plt.ylabel('Count')
-        st.pyplot(fig)
