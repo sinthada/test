@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pickle
 
-# Load the trained model
-with open('model_penguin_66130701708.pkl', 'rb') as file:
+# Load the trained KNN model
+with open('penguin_species_model.pkl', 'rb') as file:
     model = pickle.load(file)
 
 # Load the penguin dataset
@@ -53,7 +53,8 @@ if st.session_state.tab_selected == 0:
     user_input = pd.get_dummies(user_input, columns=['island', 'sex'])
 
     # Align columns with the model's expected input
-    model_columns = model.feature_names_in_
+    # Use the columns from the dataset as a reference
+    model_columns = pd.get_dummies(df, columns=['island', 'sex']).columns.drop('species')
     for col in model_columns:
         if col not in user_input.columns:
             user_input[col] = 0  # Add missing columns with zeros
