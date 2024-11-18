@@ -1,4 +1,3 @@
-%%writefile Predict_Species_Penguin.py
 
 import streamlit as st
 import pandas as pd
