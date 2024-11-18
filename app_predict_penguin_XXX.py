@@ -11,7 +11,7 @@ with open('model_penguin_66130701708.pkl', 'rb') as file:
 
 # Load your DataFrame
 # Replace 'your_data.csv' with the actual file name or URL
-df = pd.read_csv('/content/penguins_size.csv.csv')
+df = pd.read_csv('penguins_size.csv')
 
 # Streamlit App
 st.title('app_predict_penguin_66130701708')
