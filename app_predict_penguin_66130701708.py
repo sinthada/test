@@ -1,3 +1,4 @@
+%%writefile app_predict_penguin_66130701708.py
 
 import streamlit as st
 import pandas as pd
@@ -50,14 +51,8 @@ if st.session_state.tab_selected == 0:
     })
 
     # Categorical Data Encoding
-    user_input = pd.get_dummies(user_input, columns=['island', 'sex'])
-
-    # Align columns with the model's expected input
-    model_columns = model.feature_names_in_
-    for col in model_columns:
-        if col not in user_input.columns:
-            user_input[col] = 0  # Add missing columns with zeros
-    user_input = user_input[model_columns]  # Reorder columns
+    user_input['island'] = island_encoder.transform(user_input['island'])
+    user_input['sex'] = sex_encoder.transform(user_input['sex'])
 
     # Predicting the species
     prediction = model.predict(user_input)
@@ -80,3 +75,45 @@ elif st.session_state.tab_selected == 1:
     plt.xlabel(feature)
     plt.ylabel('Count')
     st.pyplot(fig)
+
+# Tab 3: Predict from CSV
+elif st.session_state.tab_selected == 2:
+    st.header('Predict from CSV')
+
+    # Upload CSV file
+    uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+
+    if uploaded_file is not None:
+        # Read CSV file
+        csv_df_org = pd.read_csv(uploaded_file) 
+        csv_df_org = csv_df_org.dropna()  # Handle missing values by dropping rows
+
+        csv_df = csv_df_org.copy()
+        csv_df = csv_df.drop('species',axis=1)
+
+     # Categorical Data Encoding
+    csv_df['island'] = island_encoder.transform(csv_df['island'])
+    csv_df['sex'] = sex_encoder.transform(csv_df['sex'])
+
+
+        # Predicting
+        predictions = model.predict(csv_df)
+
+        # Add predictions to the DataFrame
+        csv_df_org['species'] = predictions
+
+        # Display the DataFrame with predictions
+        st.subheader('Predicted Results:')
+        st.write(csv_df_org)
+
+        # Visualize predictions
+        st.subheader('Visualize Predictions')
+        feature_for_visualization = st.selectbox('Select Feature for Visualization:', csv_df.columns)
+
+        # Plot predictions
+        fig, ax = plt.subplots(figsize=(14, 8))
+        sns.histplot(data=csv_df, x=feature_for_visualization, hue='Predicted Species', data=csv_df_org, palette='viridis')
+        plt.title(f'Predicted Species Distribution by {feature_for_visualization}')
+        plt.xlabel(feature_for_visualization)
+        plt.ylabel('Count')
+        st.pyplot(fig)
