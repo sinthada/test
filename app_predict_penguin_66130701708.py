@@ -6,7 +6,7 @@ import seaborn as sns
 import pickle
 
 # Load the trained KNN model
-with open('penguin_species_model.pkl', 'rb') as file:
+with open('model_penguin_66130701708.pkl', 'rb') as file:
     model = pickle.load(file)
 
 # Load the penguin dataset
