@@ -5,9 +5,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pickle
 
-# Load the trained KNN model
+# Load the trained model (and possibly other items)
 with open('model_penguin_66130701708.pkl', 'rb') as file:
-    model = pickle.load(file)
+    # If the pickle file contains multiple objects, unpack them
+    loaded_objects = pickle.load(file)
+    
+    # Assuming the model is the first item in the tuple
+    model = loaded_objects[0]  # Adjust index if necessary
 
 # Load the penguin dataset
 df = pd.read_csv('penguins_size.csv')
@@ -122,3 +126,4 @@ elif st.session_state.tab_selected == 2:
         plt.xlabel(feature_for_visualization)
         plt.ylabel('Count')
         st.pyplot(fig)
+
